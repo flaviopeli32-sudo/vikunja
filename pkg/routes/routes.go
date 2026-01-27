@@ -505,6 +505,15 @@ func registerAPIRoutes(a *echo.Group) {
 	a.PUT("/tasks/:task/relations", taskRelationHandler.CreateWeb)
 	a.DELETE("/tasks/:task/relations/:relationKind/:otherTask", taskRelationHandler.DeleteWeb)
 
+	projectCompletionLinkHandler := &handler.WebHandler{
+		EmptyStruct: func() handler.CObject {
+			return &models.ProjectCompletionLink{}
+		},
+	}
+	a.GET("/project-completion-links", projectCompletionLinkHandler.ReadAllWeb)
+	a.GET("/project-completion-links/:link", projectCompletionLinkHandler.ReadOneWeb)
+	a.PUT("/project-completion-links", projectCompletionLinkHandler.CreateWeb)
+
 	if config.ServiceEnableTaskAttachments.GetBool() {
 		taskAttachmentHandler := &handler.WebHandler{
 			EmptyStruct: func() handler.CObject {

@@ -761,6 +761,33 @@ func (err ErrRelationDoesNotExist) HTTPError() web.HTTPError {
 	}
 }
 
+// ErrProjectCompletionLinkDoesNotExist represents an error where a project completion link does not exist.
+type ErrProjectCompletionLinkDoesNotExist struct {
+	ID int64
+}
+
+// IsErrProjectCompletionLinkDoesNotExist checks if an error is ErrProjectCompletionLinkDoesNotExist.
+func IsErrProjectCompletionLinkDoesNotExist(err error) bool {
+	_, ok := err.(ErrProjectCompletionLinkDoesNotExist)
+	return ok
+}
+
+func (err ErrProjectCompletionLinkDoesNotExist) Error() string {
+	return fmt.Sprintf("Project completion link does not exist [ID: %v]", err.ID)
+}
+
+// ErrCodeProjectCompletionLinkDoesNotExist holds the unique world-error code of this error
+const ErrCodeProjectCompletionLinkDoesNotExist = 4030
+
+// HTTPError holds the http error description
+func (err ErrProjectCompletionLinkDoesNotExist) HTTPError() web.HTTPError {
+	return web.HTTPError{
+		HTTPCode: http.StatusNotFound,
+		Code:     ErrCodeProjectCompletionLinkDoesNotExist,
+		Message:  "The project completion link does not exist.",
+	}
+}
+
 // ErrRelationTasksCannotBeTheSame represents an error where the user tries to relate a task with itself
 type ErrRelationTasksCannotBeTheSame struct {
 	TaskID      int64
