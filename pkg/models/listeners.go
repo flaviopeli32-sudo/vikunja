@@ -57,6 +57,7 @@ func RegisterListeners() {
 	events.RegisterListener((&TaskCommentUpdatedEvent{}).Name(), &HandleTaskCommentEditMentions{})
 	events.RegisterListener((&TaskCreatedEvent{}).Name(), &HandleTaskCreateMentions{})
 	events.RegisterListener((&TaskUpdatedEvent{}).Name(), &HandleTaskUpdatedMentions{})
+	events.RegisterListener((&TaskUpdatedEvent{}).Name(), &HandleProjectCompletionLabel{})
 	events.RegisterListener((&UserDataExportRequestedEvent{}).Name(), &HandleUserDataExport{})
 	events.RegisterListener((&TaskCommentCreatedEvent{}).Name(), &HandleTaskUpdateLastUpdated{})
 	events.RegisterListener((&TaskCommentUpdatedEvent{}).Name(), &HandleTaskUpdateLastUpdated{})
@@ -432,6 +433,91 @@ func (s *HandleTaskUpdatedMentions) Handle(msg *message.Message) (err error) {
 
 	_, err = notifyMentionedUsers(sess, event.Task, event.Task.Description, n)
 	return err
+}
+
+// HandleProjectCompletionLabel represents a listener
+type HandleProjectCompletionLabel struct {
+}
+
+// Name defines the name for the HandleProjectCompletionLabel listener
+func (s *HandleProjectCompletionLabel) Name() string {
+	return "task.updated.project.completion.label"
+}
+
+// Handle is executed when the event HandleProjectCompletionLabel listens on is fired
+func (s *HandleProjectCompletionLabel) Handle(msg *message.Message) (err error) {
+	event := &TaskUpdatedEvent{}
+	err = json.Unmarshal(msg.Payload, event)
+	if err != nil {
+		return err
+	}
+
+	if event.Task == nil || event.Doer == nil {
+		return nil
+	}
+
+	sess := db.NewSession()
+	defer sess.Close()
+
+	links := []*ProjectCompletionLink{}
+	err = sess.Where("child_project_id = ?", event.Task.ProjectID).Find(&links)
+	if err != nil {
+		return err
+	}
+
+	if len(links) == 0 {
+		return nil
+	}
+
+	for _, link := range links {
+		if link.LabelID == 0 {
+			continue
+		}
+
+		hasIncompleteTasks, err := sess.
+			Where("project_id = ?", link.ChildProjectID).
+			And("done = ?", false).
+			Exist(&Task{})
+		if err != nil {
+			return err
+		}
+
+		labelTask := &LabelTask{
+			TaskID:  link.ParentTaskID,
+			LabelID: link.LabelID,
+		}
+
+		if !hasIncompleteTasks {
+			canCreate, err := labelTask.CanCreate(sess, event.Doer)
+			if err != nil {
+				return err
+			}
+			if !canCreate {
+				continue
+			}
+
+			err = labelTask.Create(sess, event.Doer)
+			if err != nil && !IsErrLabelIsAlreadyOnTask(err) {
+				return err
+			}
+			continue
+		}
+
+		canDelete, err := labelTask.CanDelete(sess, event.Doer)
+		if err != nil {
+			return err
+		}
+		if !canDelete {
+			continue
+		}
+
+		err = labelTask.Delete(sess, event.Doer)
+		if err != nil && !IsErrLabelDoesNotExist(err) {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // HandleTaskUpdateLastUpdated  represents a listener
