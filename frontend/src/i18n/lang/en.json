@@ -442,6 +442,27 @@
       "secretHint": "If provided, all requests to the webhook target URL will be signed using HMAC.",
       "secretDocs": "Check out the docs for more details about how to use secrets."
     },
+    "completionLinks": {
+      "title": "Completion links",
+      "titleWithProject": "Completion links for \"{project}\"",
+      "description": "Link this project to a parent task so it receives a label once all tasks here are completed.",
+      "parentTask": "Parent task",
+      "parentTaskPlaceholder": "Type to search for a parent task…",
+      "label": "Label to apply",
+      "labelPlaceholder": "Select a label…",
+      "labelHint": "Optional: pick a label to add when all tasks in this project are done.",
+      "create": "Add completion link",
+      "createSuccess": "The completion link was successfully created.",
+      "taskRequired": "Please select a parent task.",
+      "loadingTask": "Loading parent task…",
+      "noneYet": "No completion links yet.",
+      "columns": {
+        "task": "Parent task",
+        "project": "Project",
+        "label": "Label",
+        "created": "Created"
+      }
+    },
     "views": {
       "header": "Edit views",
       "title": "Title",

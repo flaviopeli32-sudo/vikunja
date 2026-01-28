@@ -106,6 +106,13 @@
 				{{ $t('project.webhooks.title') }}
 			</DropdownItem>
 			<DropdownItem
+				v-if="!simple"
+				:to="{ name: 'project.settings.completion-links', params: { projectId: project.id } }"
+				icon="check"
+			>
+				{{ $t('project.completionLinks.title') }}
+			</DropdownItem>
+			<DropdownItem
 				:to="{ name: 'project.createFromParent', params: { parentProjectId: project.id } }"
 				icon="layer-group"
 			>

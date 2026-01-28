@@ -260,6 +260,14 @@ const router = createRouter({
 			},
 		},
 		{
+			path: '/projects/:projectId/settings/completion-links',
+			name: 'project.settings.completion-links',
+			component: () => import('@/views/project/settings/ProjectSettingsCompletionLinks.vue'),
+			meta: {
+				showAsModal: true,
+			},
+		},
+		{
 			path: '/projects/:projectId/settings/delete',
 			name: 'project.settings.delete',
 			component: () => import('@/views/project/settings/ProjectSettingsDelete.vue'),
